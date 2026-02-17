@@ -55,8 +55,14 @@ button {
   border-radius: 15px;
   padding: 10px;
   position: relative;
+  cursor: pointer;
+  transition: 0.2s;
 }
 
+.card.owned {
+  background: #ff9ed1;
+  color: white;
+}
 .delete {
   position: absolute;
   top: 5px;
@@ -97,12 +103,17 @@ function render() {
   cards.forEach((card, index) => {
     const div = document.createElement("div");
     div.className = "card";
+    if(card.owned) div.classList.add("owned");
     div.innerHTML = `
-      <div class="delete" onclick="deleteCard(${index})">❌</div>
+      <div class="delete" onclick="deleteCard(${index}, event)">❌</div>
       <div><b>${card.member}</b></div>
       <div>${card.album}</div>
       <div>${card.grade}</div>
     `;
+    div.onclick = function() {
+      card.owned = !card.owned;
+      render();
+    }
     grid.appendChild(div);
   });
   save();
@@ -115,7 +126,7 @@ function addCard() {
 
   if (!member) return;
 
-  cards.push({ member, album, grade });
+  cards.push({ member, album, grade, owned: false });
 
   document.getElementById("member").value = "";
   document.getElementById("album").value = "";
@@ -124,7 +135,8 @@ function addCard() {
   render();
 }
 
-function deleteCard(index) {
+function deleteCard(index, e) {
+  e.stopPropagation(); // 클릭 이벤트 버블 막기
   cards.splice(index, 1);
   render();
 }
