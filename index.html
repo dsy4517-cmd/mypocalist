@@ -28,8 +28,8 @@ h1 {
 .card {
   background: white;
   border-radius: 20px;
-  padding: 30px 10px;
-  font-size: 14px;
+  padding: 25px 5px;
+  font-size: 12px;
   cursor: pointer;
   box-shadow: 0 6px 15px rgba(255, 105, 180, 0.3);
   transition: 0.2s;
@@ -51,8 +51,9 @@ h1 {
   bottom: 5px;
   left: 0;
   right: 0;
-  font-size: 11px;
+  font-size: 10px;
 }
+
 .footer {
   padding: 15px;
   font-size: 12px;
@@ -65,29 +66,29 @@ h1 {
 
 <h1>🎀 My Poca List 🎀</h1>
 
-<div class="grid">
-  <div class="card" onclick="toggle(this,0)">포카 1</div>
-  <div class="card" onclick="toggle(this,1)">포카 2</div>
-  <div class="card" onclick="toggle(this,2)">포카 3</div>
-  <div class="card" onclick="toggle(this,3)">포카 4</div>
-  <div class="card" onclick="toggle(this,4)">포카 5</div>
-  <div class="card" onclick="toggle(this,5)">포카 6</div>
-</div>
+<div class="grid" id="grid"></div>
 
-<div class="footer">💗 나만의 포카 리스트 💗</div>
+<div class="footer">💗 총 200장 포카 💗</div>
 
 <script>
-function toggle(element, index) {
-  element.classList.toggle("owned");
-  localStorage.setItem("poca" + index, element.classList.contains("owned"));
-}
+const totalCards = 200;
+const grid = document.getElementById("grid");
 
-window.onload = function() {
-  for (let i = 0; i < 6; i++) {
-    if (localStorage.getItem("poca" + i) === "true") {
-      document.getElementsByClassName("card")[i].classList.add("owned");
-    }
+for (let i = 0; i < totalCards; i++) {
+  const card = document.createElement("div");
+  card.className = "card";
+  card.innerText = "포카 " + (i + 1);
+
+  if (localStorage.getItem("poca" + i) === "true") {
+    card.classList.add("owned");
   }
+
+  card.onclick = function() {
+    card.classList.toggle("owned");
+    localStorage.setItem("poca" + i, card.classList.contains("owned"));
+  };
+
+  grid.appendChild(card);
 }
 </script>
 
