@@ -36,13 +36,16 @@ button { border:none; background:#999; color:white; cursor:pointer; }
 <div class="grid" id="grid"></div>
 
 <script>
-localStorage.clear();
-let cards = [];
+// ✅ 새로고침에도 데이터 유지
+let cards = JSON.parse(localStorage.getItem("pocaData")) || [];
 const grid = document.getElementById("grid");
 const counter = document.getElementById("counter");
 
 // 저장 및 카운터
-function save(){ localStorage.setItem("pocaData", JSON.stringify(cards)); updateCounter(); }
+function save(){
+  localStorage.setItem("pocaData", JSON.stringify(cards));
+  updateCounter();
+}
 function updateCounter(){
   const owned = cards.filter(c=>c.owned).length;
   const total = cards.length;
