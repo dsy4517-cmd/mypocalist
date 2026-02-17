@@ -14,6 +14,7 @@ button { padding:6px 10px; border-radius:10px; border:none; background:#ff9ed1; 
 .card { background:white; border-radius:15px; padding:10px; position:relative; cursor:pointer; transition:0.2s; }
 .card.owned { background:#ff9ed1; color:white; }
 .delete { position:absolute; top:5px; right:5px; font-size:12px; cursor:pointer; }
+.editBtn { margin-top:5px; background:#fff0d6; color:#ff4fa3; border-radius:5px; border:1px solid #ff9ed1; padding:2px 5px; font-size:12px; cursor:pointer; }
 </style>
 </head>
 <body>
@@ -31,7 +32,7 @@ button { padding:6px 10px; border-radius:10px; border:none; background:#ff9ed1; 
 <div class="grid" id="grid"></div>
 
 <script>
-// 기본 데이터 6000장 샘플 (실제 사용할 땐 여기 숫자 늘리면 됨)
+// 기본 데이터 6000장 샘플
 let cards = JSON.parse(localStorage.getItem("pocaData")) || [];
 if(cards.length===0){
   for(let i=1;i<=6000;i++){
@@ -41,7 +42,6 @@ if(cards.length===0){
 
 const grid = document.getElementById("grid");
 const counter = document.getElementById("counter");
-
 const pageSize = 100;
 let currentPage = 0;
 
@@ -62,27 +62,38 @@ function render(){
     const div = document.createElement("div");
     div.className="card";
     if(card.owned) div.classList.add("owned");
+
+    // 카드 내용
     div.innerHTML=`
       <div class="delete" onclick="deleteCard(${i},event)">❌</div>
       <div><b>${card.member}</b></div>
       <div>${card.album}</div>
       <div>${card.grade}</div>
+      <button class="editBtn" onclick="editCard(${i},event)">✏️ 수정</button>
     `;
+
+    // 클릭 → 가지고 있음 체크
     div.onclick=function(){
-      card.owned=!card.owned; render();
-    }
-    div.ondblclick=function(){
-      const m=prompt("멤버 이름:",card.member);
-      const a=prompt("앨범 이름:",card.album);
-      const g=prompt("등급:",card.grade);
-      if(m) card.member=m;
-      if(a) card.album=a;
-      if(g) card.grade=g;
+      card.owned=!card.owned;
       render();
     }
+
     grid.appendChild(div);
   }
   save();
+}
+
+// 모바일용 수정 버튼
+function editCard(index,e){
+  e.stopPropagation(); // 클릭 이벤트 방지
+  const card = cards[index];
+  const m = prompt("멤버 이름:", card.member);
+  const a = prompt("앨범 이름:", card.album);
+  const g = prompt("등급:", card.grade);
+  if(m) card.member=m;
+  if(a) card.album=a;
+  if(g) card.grade=g;
+  render();
 }
 
 // 스크롤로 다음 페이지 불러오기
