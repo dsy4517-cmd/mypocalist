@@ -6,7 +6,7 @@
 
 <style>
 body {
-  font-family: "Arial";
+  font-family: Arial;
   background: linear-gradient(to bottom, #ffd6ec, #fff0f7);
   text-align: center;
   margin: 0;
@@ -14,30 +14,44 @@ body {
 
 h1 {
   color: #ff4fa3;
-  padding: 20px;
-  font-size: 26px;
+  padding: 15px;
+}
+
+.album-buttons {
+  display: flex;
+  overflow-x: auto;
+  padding: 10px;
+  gap: 8px;
+}
+
+.album-buttons button {
+  border: none;
+  padding: 8px 12px;
+  border-radius: 15px;
+  background: white;
+  cursor: pointer;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+}
+
+.album-buttons button.active {
+  background: #ff9ed1;
+  color: white;
 }
 
 .grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 15px;
-  padding: 15px;
+  gap: 12px;
+  padding: 12px;
 }
 
 .card {
   background: white;
-  border-radius: 20px;
-  padding: 25px 5px;
+  border-radius: 15px;
+  padding: 20px 5px;
   font-size: 12px;
   cursor: pointer;
-  box-shadow: 0 6px 15px rgba(255, 105, 180, 0.3);
-  transition: 0.2s;
   position: relative;
-}
-
-.card:hover {
-  transform: scale(1.05);
 }
 
 .owned {
@@ -46,50 +60,66 @@ h1 {
 }
 
 .owned::after {
-  content: "💖 가지고 있음!";
+  content: "💖";
   position: absolute;
   bottom: 5px;
-  left: 0;
-  right: 0;
-  font-size: 10px;
-}
-
-.footer {
-  padding: 15px;
-  font-size: 12px;
-  color: #ff69b4;
+  right: 5px;
 }
 </style>
 </head>
 
 <body>
 
-<h1>🎀 My Poca List 🎀</h1>
+<h1>🎀 My 6000 Poca 🎀</h1>
 
+<div class="album-buttons" id="albums"></div>
 <div class="grid" id="grid"></div>
 
-<div class="footer">💗 총 200장 포카 💗</div>
-
 <script>
-const totalCards = 200;
+const albums = 30;
+const cardsPerAlbum = 200;
+let currentAlbum = 0;
+
+const albumDiv = document.getElementById("albums");
 const grid = document.getElementById("grid");
 
-for (let i = 0; i < totalCards; i++) {
-  const card = document.createElement("div");
-  card.className = "card";
-  card.innerText = "포카 " + (i + 1);
+function loadAlbum(albumIndex) {
+  currentAlbum = albumIndex;
+  grid.innerHTML = "";
 
-  if (localStorage.getItem("poca" + i) === "true") {
-    card.classList.add("owned");
+  document.querySelectorAll("button").forEach(btn => btn.classList.remove("active"));
+  document.getElementById("btn"+albumIndex).classList.add("active");
+
+  for (let i = 0; i < cardsPerAlbum; i++) {
+    const globalIndex = albumIndex * cardsPerAlbum + i;
+    const card = document.createElement("div");
+    card.className = "card";
+    card.innerText = "포카 " + (globalIndex + 1);
+
+    if (localStorage.getItem("poca" + globalIndex) === "true") {
+      card.classList.add("owned");
+    }
+
+    card.onclick = function() {
+      card.classList.toggle("owned");
+      localStorage.setItem("poca" + globalIndex, card.classList.contains("owned"));
+    };
+
+    grid.appendChild(card);
   }
-
-  card.onclick = function() {
-    card.classList.toggle("owned");
-    localStorage.setItem("poca" + i, card.classList.contains("owned"));
-  };
-
-  grid.appendChild(card);
 }
+
+for (let i = 0; i < albums; i++) {
+  const btn = document.createElement("button");
+  btn.innerText = "앨범 " + (i + 1);
+  btn.id = "btn"+i;
+  btn.onclick = function() {
+    loadAlbum(i);
+  };
+  albumDiv.appendChild(btn);
+}
+
+loadAlbum(0);
 </script>
 
 </body>
