@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>My Poca List 💖</title>
+<title>My IVE Poca 💖</title>
 
 <style>
 body {
@@ -14,133 +14,122 @@ body {
 
 h1 {
   color: #ff4fa3;
-  padding: 10px;
+  padding: 15px;
 }
 
 .counter {
-  font-size: 16px;
+  font-weight: bold;
   color: #ff4fa3;
   margin-bottom: 10px;
-  font-weight: bold;
 }
 
-.album-buttons {
-  display: flex;
-  overflow-x: auto;
+.input-box {
   padding: 10px;
-  gap: 8px;
 }
 
-.album-buttons button {
+input {
+  padding: 6px;
+  margin: 3px;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+}
+
+button {
+  padding: 6px 10px;
+  border-radius: 10px;
   border: none;
-  padding: 8px 12px;
-  border-radius: 15px;
-  background: white;
-  cursor: pointer;
-}
-
-.album-buttons button.active {
   background: #ff9ed1;
   color: white;
+  cursor: pointer;
 }
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
-  padding: 12px;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  padding: 10px;
 }
 
 .card {
   background: white;
   border-radius: 15px;
-  padding: 20px 5px;
-  font-size: 12px;
-  cursor: pointer;
+  padding: 10px;
   position: relative;
 }
 
-.owned {
-  background: #ff9ed1;
-  color: white;
-}
-
-.owned::after {
-  content: "💖";
+.delete {
   position: absolute;
-  bottom: 5px;
+  top: 5px;
   right: 5px;
+  font-size: 12px;
+  cursor: pointer;
 }
 </style>
 </head>
 
 <body>
 
-<h1>🎀 My 6000 Poca 🎀</h1>
-<div class="counter" id="counter">💖 0 / 6000</div>
+<h1>👑 My IVE Poca 👑</h1>
+<div class="counter" id="counter">0장</div>
 
-<div class="album-buttons" id="albums"></div>
+<div class="input-box">
+  <input id="member" placeholder="멤버">
+  <input id="album" placeholder="앨범">
+  <input id="grade" placeholder="등급">
+  <button onclick="addCard()">추가</button>
+</div>
+
 <div class="grid" id="grid"></div>
 
 <script>
-const albums = 30;
-const cardsPerAlbum = 200;
-const totalCards = albums * cardsPerAlbum;
-let currentAlbum = 0;
+let cards = JSON.parse(localStorage.getItem("pocaData")) || [];
 
-const albumDiv = document.getElementById("albums");
 const grid = document.getElementById("grid");
 const counter = document.getElementById("counter");
 
-function updateCounter() {
-  let count = 0;
-  for (let i = 0; i < totalCards; i++) {
-    if (localStorage.getItem("poca" + i) === "true") {
-      count++;
-    }
-  }
-  counter.innerText = "💖 " + count + " / " + totalCards;
+function save() {
+  localStorage.setItem("pocaData", JSON.stringify(cards));
+  counter.innerText = cards.length + "장";
 }
 
-function loadAlbum(albumIndex) {
-  currentAlbum = albumIndex;
+function render() {
   grid.innerHTML = "";
-
-  document.querySelectorAll("button").forEach(btn => btn.classList.remove("active"));
-  document.getElementById("btn"+albumIndex).classList.add("active");
-
-  for (let i = 0; i < cardsPerAlbum; i++) {
-    const globalIndex = albumIndex * cardsPerAlbum + i;
-    const card = document.createElement("div");
-    card.className = "card";
-    card.innerText = "포카 " + (globalIndex + 1);
-
-    if (localStorage.getItem("poca" + globalIndex) === "true") {
-      card.classList.add("owned");
-    }
-
-    card.onclick = function() {
-      card.classList.toggle("owned");
-      localStorage.setItem("poca" + globalIndex, card.classList.contains("owned"));
-      updateCounter();
-    };
-
-    grid.appendChild(card);
-  }
+  cards.forEach((card, index) => {
+    const div = document.createElement("div");
+    div.className = "card";
+    div.innerHTML = `
+      <div class="delete" onclick="deleteCard(${index})">❌</div>
+      <div><b>${card.member}</b></div>
+      <div>${card.album}</div>
+      <div>${card.grade}</div>
+    `;
+    grid.appendChild(div);
+  });
+  save();
 }
 
-for (let i = 0; i < albums; i++) {
-  const btn = document.createElement("button");
-  btn.innerText = "앨범 " + (i + 1);
-  btn.id = "btn"+i;
-  btn.onclick = function() {
-    loadAlbum(i);
-  };
-  albumDiv.appendChild(btn);
+function addCard() {
+  const member = document.getElementById("member").value;
+  const album = document.getElementById("album").value;
+  const grade = document.getElementById("grade").value;
+
+  if (!member) return;
+
+  cards.push({ member, album, grade });
+
+  document.getElementById("member").value = "";
+  document.getElementById("album").value = "";
+  document.getElementById("grade").value = "";
+
+  render();
 }
 
-loadAlbum(0);
-updateCounter();
+function deleteCard(index) {
+  cards.splice(index, 1);
+  render();
+}
+
+render();
 </script>
 
 </body>
