@@ -34,7 +34,10 @@ button { border:none; background:#ff9ed1; color:white; cursor:pointer; }
 <div class="grid" id="grid"></div>
 
 <script>
-let cards = JSON.parse(localStorage.getItem("pocaData")) || [];
+// 완전히 새로 시작 → 이전 데이터 삭제
+localStorage.clear();
+
+let cards = [];
 const grid = document.getElementById("grid");
 const counter = document.getElementById("counter");
 
