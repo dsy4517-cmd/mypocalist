@@ -1,86 +1,66 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>My Poca List</title>
-<style>
-body {
-  font-family: Arial;
-  background: #fff0f5;
-  text-align: center;
-}
+  <meta charset="UTF-8">
+  <title>My Poca List 💖</title>
+  <style>
+    body {
+      font-family: Arial;
+      background: #ffeef5;
+      text-align: center;
+    }
 
-h1 {
-  color: #ff69b4;
-}
+    h1 {
+      color: #ff4fa3;
+    }
 
-.grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
-  padding: 10px;
-}
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      padding: 10px;
+    }
 
-.card {
-  background: white;
-  border-radius: 15px;
-  padding: 5px;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-}
+    .card {
+      background: white;
+      padding: 20px;
+      border-radius: 15px;
+      cursor: pointer;
+      font-size: 14px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
 
-.card img {
-  width: 100%;
-  border-radius: 10px;
-}
-
-.owned {
-  opacity: 0.4;
-}
-</style>
+    .owned {
+      background: #ffb6d9;
+    }
+  </style>
 </head>
 <body>
 
 <h1>💖 My Poca List 💖</h1>
 
 <div class="grid">
-
-<div class="card" onclick="toggle(this,1)">
-<img src="https://via.placeholder.com/150">
-<p>포카 1</p>
-</div>
-
-<div class="card" onclick="toggle(this,2)">
-<img src="https://via.placeholder.com/150">
-<p>포카 2</p>
-</div>
-
-<div class="card" onclick="toggle(this,3)">
-<img src="https://via.placeholder.com/150">
-<p>포카 3</p>
-</div>
-
+  <div class="card" onclick="toggle(this,0)">포카 1</div>
+  <div class="card" onclick="toggle(this,1)">포카 2</div>
+  <div class="card" onclick="toggle(this,2)">포카 3</div>
+  <div class="card" onclick="toggle(this,3)">포카 4</div>
+  <div class="card" onclick="toggle(this,4)">포카 5</div>
+  <div class="card" onclick="toggle(this,5)">포카 6</div>
 </div>
 
 <script>
-function toggle(card, num) {
-  card.classList.toggle("owned");
-
-  if (card.classList.contains("owned")) {
-    localStorage.setItem("poca"+num, "yes");
-  } else {
-    localStorage.removeItem("poca"+num);
+  function toggle(element, index) {
+    element.classList.toggle("owned");
+    localStorage.setItem("poca" + index, element.classList.contains("owned"));
   }
-}
 
-window.onload = function() {
-  for (let i = 1; i <= 200; i++) {
-    if (localStorage.getItem("poca"+i) === "yes") {
-      let cards = document.getElementsByClassName("card");
-      if(cards[i-1]) cards[i-1].classList.add("owned");
+  window.onload = function() {
+    for (let i = 0; i < 6; i++) {
+      if (localStorage.getItem("poca" + i) === "true") {
+        document.getElementsByClassName("card")[i].classList.add("owned");
+      }
     }
   }
-}
 </script>
 
 </body>
