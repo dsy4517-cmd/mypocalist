@@ -30,7 +30,7 @@ button { border:none; background:#ff9ed1; color:white; cursor:pointer; }
   <input id="grade" placeholder="등급">
   <button onclick="addFile()">추가</button>
   <br>
-  <input id="searchInput" placeholder="멤버 이름으로 검색" oninput="render()">
+  <input id="searchInput" placeholder="멤버/앨범/등급 검색" oninput="render()">
 </div>
 
 <div class="grid" id="grid"></div>
@@ -49,12 +49,13 @@ function updateCounter(){
   counter.innerText = `💖 ${owned} / ${total} (${Math.round((owned/total)*100)}%)`;
 }
 
-// 렌더링 + 검색
+// 렌더링 + 통합 검색
 function render(){
   const query = document.getElementById("searchInput").value.toLowerCase();
   grid.innerHTML="";
   cards.forEach((card,index)=>{
-    if(card.member.toLowerCase().includes(query)){
+    const searchable = `${card.member} ${card.album} ${card.grade}`.toLowerCase();
+    if(searchable.includes(query)){
       const div=document.createElement("div");
       div.className="card";
       if(card.owned) div.classList.add("owned");
