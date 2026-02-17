@@ -15,11 +15,12 @@ button { border:none; background:#ff9ed1; color:white; cursor:pointer; }
 .card.owned { background:#ff9ed1; color:white; }
 .delete { position:absolute; top:5px; right:5px; font-size:12px; cursor:pointer; }
 .card img { width:100%; border-radius:10px; }
+.editBtn { margin-top:5px; background:#fff0d6; color:#ff4fa3; border-radius:5px; border:1px solid #ff9ed1; padding:2px 5px; font-size:12px; cursor:pointer; }
 </style>
 </head>
 <body>
 
-<h1>👑 My IVE Poca 💖</h1>
+<h1>👑 My IVE Poca 👑</h1>
 <div class="counter" id="counter">0장 (0%)</div>
 
 <div class="input-box">
@@ -33,10 +34,14 @@ button { border:none; background:#ff9ed1; color:white; cursor:pointer; }
 <div class="grid" id="grid"></div>
 
 <script>
+// 카드 데이터
 let cards = JSON.parse(localStorage.getItem("pocaData")) || [];
 const grid = document.getElementById("grid");
 const counter = document.getElementById("counter");
+const pageSize = 100; // 한 번에 화면에 띄울 카드 수
+let currentPage = 0;
 
+// 저장 및 카운터 업데이트
 function save(){ localStorage.setItem("pocaData", JSON.stringify(cards)); updateCounter(); }
 function updateCounter(){
   const owned = cards.filter(c=>c.owned).length;
@@ -44,27 +49,47 @@ function updateCounter(){
   counter.innerText = `💖 ${owned} / ${total} (${Math.round((owned/total)*100)}%)`;
 }
 
+// 카드 렌더링 (스크롤로 페이지 불러오기)
 function render(){
   grid.innerHTML="";
-  cards.forEach((card,index)=>{
+  const start = currentPage*pageSize;
+  const end = Math.min(start+pageSize, cards.length);
+  for(let i=start;i<end;i++){
+    const card = cards[i];
     const div = document.createElement("div");
     div.className="card";
     if(card.owned) div.classList.add("owned");
 
     div.innerHTML=`
-      <div class="delete" onclick="deleteCard(${index},event)">❌</div>
+      <div class="delete" onclick="deleteCard(${i},event)">❌</div>
       <img src="${card.img}" alt="포카">
       <div><b>${card.member}</b></div>
       <div>${card.album}</div>
       <div>${card.grade}</div>
+      <button class="editBtn" onclick="editCard(${i},event)">✏️ 수정</button>
     `;
 
+    // 클릭 → 가지고 있음 체크
     div.onclick=function(){ card.owned=!card.owned; render(); }
     grid.appendChild(div);
-  });
+  }
   save();
 }
 
+// 수정 버튼 (모바일 친화)
+function editCard(index,e){
+  e.stopPropagation();
+  const card = cards[index];
+  const m = prompt("멤버 이름:", card.member);
+  const a = prompt("앨범 이름:", card.album);
+  const g = prompt("등급:", card.grade);
+  if(m) card.member=m;
+  if(a) card.album=a;
+  if(g) card.grade=g;
+  render();
+}
+
+// 파일 업로드 → 카드 생성
 function addFiles(){
   const files = document.getElementById("fileInput").files;
   const member = document.getElementById("member").value;
@@ -86,7 +111,18 @@ function addFiles(){
   document.getElementById("fileInput").value="";
 }
 
+// 카드 삭제
 function deleteCard(index,e){ e.stopPropagation(); cards.splice(index,1); render(); }
+
+// 스크롤로 다음 페이지 불러오기
+window.onscroll=function(){
+  if((window.innerHeight+window.scrollY)>=document.body.offsetHeight-10){
+    if((currentPage+1)*pageSize<cards.length){
+      currentPage++;
+      render();
+    }
+  }
+}
 
 render();
 </script>
