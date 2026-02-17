@@ -3,77 +3,19 @@
 <head>
 <meta charset="UTF-8">
 <title>My IVE Poca 💖</title>
-
 <style>
-body {
-  font-family: Arial;
-  background: linear-gradient(to bottom, #ffd6ec, #fff0f7);
-  text-align: center;
-  margin: 0;
-}
-
-h1 {
-  color: #ff4fa3;
-  padding: 15px;
-}
-
-.counter {
-  font-weight: bold;
-  color: #ff4fa3;
-  margin-bottom: 10px;
-}
-
-.input-box {
-  padding: 10px;
-}
-
-input {
-  padding: 6px;
-  margin: 3px;
-  border-radius: 10px;
-  border: 1px solid #ccc;
-}
-
-button {
-  padding: 6px 10px;
-  border-radius: 10px;
-  border: none;
-  background: #ff9ed1;
-  color: white;
-  cursor: pointer;
-}
-
-.grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 10px;
-  padding: 10px;
-}
-
-.card {
-  background: white;
-  border-radius: 15px;
-  padding: 10px;
-  position: relative;
-  cursor: pointer;
-  transition: 0.2s;
-}
-
-.card.owned {
-  background: #ff9ed1;
-  color: white;
-}
-
-.delete {
-  position: absolute;
-  top: 5px;
-  right: 5px;
-  font-size: 12px;
-  cursor: pointer;
-}
+body { font-family: Arial; background: linear-gradient(to bottom,#ffd6ec,#fff0f7); text-align:center; margin:0; }
+h1 { color:#ff4fa3; padding:15px; }
+.counter { font-weight:bold; color:#ff4fa3; margin-bottom:10px; }
+.input-box { padding:10px; }
+input { padding:6px; margin:3px; border-radius:10px; border:1px solid #ccc; }
+button { padding:6px 10px; border-radius:10px; border:none; background:#ff9ed1; color:white; cursor:pointer; }
+.grid { display:grid; grid-template-columns:repeat(2,1fr); gap:10px; padding:10px; }
+.card { background:white; border-radius:15px; padding:10px; position:relative; cursor:pointer; transition:0.2s; }
+.card.owned { background:#ff9ed1; color:white; }
+.delete { position:absolute; top:5px; right:5px; font-size:12px; cursor:pointer; }
 </style>
 </head>
-
 <body>
 
 <h1>👑 My IVE Poca 👑</h1>
@@ -89,63 +31,86 @@ button {
 <div class="grid" id="grid"></div>
 
 <script>
+// 기본 데이터 6000장 샘플 (실제 사용할 땐 여기 숫자 늘리면 됨)
 let cards = JSON.parse(localStorage.getItem("pocaData")) || [];
+if(cards.length===0){
+  for(let i=1;i<=6000;i++){
+    cards.push({member:"멤버"+((i-1)%6+1), album:"앨범"+((i-1)%5+1), grade:["⭐","⭐⭐","⭐⭐⭐","💎레어"][(i-1)%4], owned:false});
+  }
+}
 
 const grid = document.getElementById("grid");
 const counter = document.getElementById("counter");
 
-function save() {
-  localStorage.setItem("pocaData", JSON.stringify(cards));
-  updateCounter();
+const pageSize = 100;
+let currentPage = 0;
+
+function save(){ localStorage.setItem("pocaData", JSON.stringify(cards)); updateCounter(); }
+
+function updateCounter(){
+  const owned = cards.filter(c=>c.owned).length;
+  const total = cards.length;
+  counter.innerText = `💖 ${owned} / ${total} (${Math.round((owned/total)*100)}%)`;
 }
 
-function updateCounter() {
-  const ownedCount = cards.filter(c => c.owned).length;
-  const totalCount = cards.length;
-  const percent = totalCount ? Math.round((ownedCount / totalCount) * 100) : 0;
-  counter.innerText = `💖 ${ownedCount} / ${totalCount} (${percent}%)`;
-}
-
-function render() {
-  grid.innerHTML = "";
-  cards.forEach((card, index) => {
+function render(){
+  grid.innerHTML="";
+  const start = currentPage*pageSize;
+  const end = Math.min(start+pageSize, cards.length);
+  for(let i=start;i<end;i++){
+    const card = cards[i];
     const div = document.createElement("div");
-    div.className = "card";
+    div.className="card";
     if(card.owned) div.classList.add("owned");
-    div.innerHTML = `
-      <div class="delete" onclick="deleteCard(${index}, event)">❌</div>
+    div.innerHTML=`
+      <div class="delete" onclick="deleteCard(${i},event)">❌</div>
       <div><b>${card.member}</b></div>
       <div>${card.album}</div>
       <div>${card.grade}</div>
     `;
-    div.onclick = function() {
-      card.owned = !card.owned;
+    div.onclick=function(){
+      card.owned=!card.owned; render();
+    }
+    div.ondblclick=function(){
+      const m=prompt("멤버 이름:",card.member);
+      const a=prompt("앨범 이름:",card.album);
+      const g=prompt("등급:",card.grade);
+      if(m) card.member=m;
+      if(a) card.album=a;
+      if(g) card.grade=g;
       render();
     }
     grid.appendChild(div);
-  });
+  }
   save();
 }
 
-function addCard() {
-  const member = document.getElementById("member").value;
-  const album = document.getElementById("album").value;
-  const grade = document.getElementById("grade").value;
+// 스크롤로 다음 페이지 불러오기
+window.onscroll=function(){
+  if((window.innerHeight+window.scrollY)>=document.body.offsetHeight-10){
+    if((currentPage+1)*pageSize<cards.length){
+      currentPage++;
+      render();
+    }
+  }
+}
 
-  if (!member) return;
-
-  cards.push({ member, album, grade, owned: false });
-
-  document.getElementById("member").value = "";
-  document.getElementById("album").value = "";
-  document.getElementById("grade").value = "";
-
+function addCard(){
+  const m=document.getElementById("member").value;
+  const a=document.getElementById("album").value;
+  const g=document.getElementById("grade").value;
+  if(!m) return;
+  cards.push({member:m, album:a, grade:g, owned:false});
+  document.getElementById("member").value="";
+  document.getElementById("album").value="";
+  document.getElementById("grade").value="";
+  currentPage=Math.floor(cards.length/pageSize);
   render();
 }
 
-function deleteCard(index, e) {
-  e.stopPropagation(); // 클릭 이벤트 버블 막기
-  cards.splice(index, 1);
+function deleteCard(index,e){
+  e.stopPropagation();
+  cards.splice(index,1);
   render();
 }
 
