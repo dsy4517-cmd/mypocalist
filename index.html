@@ -1,43 +1,69 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="UTF-8">
-  <title>My Poca List 💖</title>
-  <style>
-    body {
-      font-family: Arial;
-      background: #ffeef5;
-      text-align: center;
-    }
+<meta charset="UTF-8">
+<title>My Poca List 💖</title>
 
-    h1 {
-      color: #ff4fa3;
-    }
+<style>
+body {
+  font-family: "Arial";
+  background: linear-gradient(to bottom, #ffd6ec, #fff0f7);
+  text-align: center;
+  margin: 0;
+}
 
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 10px;
-      padding: 10px;
-    }
+h1 {
+  color: #ff4fa3;
+  padding: 20px;
+  font-size: 26px;
+}
 
-    .card {
-      background: white;
-      padding: 20px;
-      border-radius: 15px;
-      cursor: pointer;
-      font-size: 14px;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    }
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 15px;
+  padding: 15px;
+}
 
-    .owned {
-      background: #ffb6d9;
-    }
-  </style>
+.card {
+  background: white;
+  border-radius: 20px;
+  padding: 30px 10px;
+  font-size: 14px;
+  cursor: pointer;
+  box-shadow: 0 6px 15px rgba(255, 105, 180, 0.3);
+  transition: 0.2s;
+  position: relative;
+}
+
+.card:hover {
+  transform: scale(1.05);
+}
+
+.owned {
+  background: #ff9ed1;
+  color: white;
+}
+
+.owned::after {
+  content: "💖 가지고 있음!";
+  position: absolute;
+  bottom: 5px;
+  left: 0;
+  right: 0;
+  font-size: 11px;
+}
+.footer {
+  padding: 15px;
+  font-size: 12px;
+  color: #ff69b4;
+}
+</style>
 </head>
+
 <body>
 
-<h1>💖 My Poca List 💖</h1>
+<h1>🎀 My Poca List 🎀</h1>
 
 <div class="grid">
   <div class="card" onclick="toggle(this,0)">포카 1</div>
@@ -48,19 +74,21 @@
   <div class="card" onclick="toggle(this,5)">포카 6</div>
 </div>
 
-<script>
-  function toggle(element, index) {
-    element.classList.toggle("owned");
-    localStorage.setItem("poca" + index, element.classList.contains("owned"));
-  }
+<div class="footer">💗 나만의 포카 리스트 💗</div>
 
-  window.onload = function() {
-    for (let i = 0; i < 6; i++) {
-      if (localStorage.getItem("poca" + i) === "true") {
-        document.getElementsByClassName("card")[i].classList.add("owned");
-      }
+<script>
+function toggle(element, index) {
+  element.classList.toggle("owned");
+  localStorage.setItem("poca" + index, element.classList.contains("owned"));
+}
+
+window.onload = function() {
+  for (let i = 0; i < 6; i++) {
+    if (localStorage.getItem("poca" + i) === "true") {
+      document.getElementsByClassName("card")[i].classList.add("owned");
     }
   }
+}
 </script>
 
 </body>
