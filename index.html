@@ -29,14 +29,14 @@ button { border:none; background:#ff9ed1; color:white; cursor:pointer; }
   <input id="album" placeholder="앨범">
   <input id="grade" placeholder="등급">
   <button onclick="addFile()">추가</button>
+  <br>
+  <input id="searchInput" placeholder="멤버 이름으로 검색" oninput="render()">
 </div>
 
 <div class="grid" id="grid"></div>
 
 <script>
-// 완전히 새로 시작 → 이전 데이터 삭제
 localStorage.clear();
-
 let cards = [];
 const grid = document.getElementById("grid");
 const counter = document.getElementById("counter");
@@ -49,27 +49,28 @@ function updateCounter(){
   counter.innerText = `💖 ${owned} / ${total} (${Math.round((owned/total)*100)}%)`;
 }
 
-// 카드 렌더링
+// 렌더링 + 검색
 function render(){
+  const query = document.getElementById("searchInput").value.toLowerCase();
   grid.innerHTML="";
   cards.forEach((card,index)=>{
-    const div=document.createElement("div");
-    div.className="card";
-    if(card.owned) div.classList.add("owned");
+    if(card.member.toLowerCase().includes(query)){
+      const div=document.createElement("div");
+      div.className="card";
+      if(card.owned) div.classList.add("owned");
 
-    div.innerHTML=`
-      <div class="delete" onclick="deleteCard(${index},event)">❌</div>
-      <img src="${card.img}" alt="포카">
-      <div><b>${card.member}</b></div>
-      <div>${card.album}</div>
-      <div>${card.grade}</div>
-      <button class="editBtn" onclick="editCard(${index},event)">✏️ 수정</button>
-    `;
+      div.innerHTML=`
+        <div class="delete" onclick="deleteCard(${index},event)">❌</div>
+        <img src="${card.img}" alt="포카">
+        <div><b>${card.member}</b></div>
+        <div>${card.album}</div>
+        <div>${card.grade}</div>
+        <button class="editBtn" onclick="editCard(${index},event)">✏️ 수정</button>
+      `;
 
-    // 클릭 → 가지고 있음 체크
-    div.onclick=function(){ card.owned=!card.owned; render(); }
-
-    grid.appendChild(div);
+      div.onclick=function(){ card.owned=!card.owned; render(); }
+      grid.appendChild(div);
+    }
   });
   save();
 }
