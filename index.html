@@ -2,6 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>포카 리스트</title>
 <style>
 body { font-family: Arial; background:#f5f5f5; text-align:center; margin:0; }
@@ -15,6 +16,11 @@ button { border:none; background:#999; color:white; cursor:pointer; }
 .delete { position:absolute; top:5px; right:5px; font-size:12px; cursor:pointer; }
 .card img { width:100%; border-radius:10px; }
 .editBtn { margin-top:5px; background:#ddd; color:#333; border-radius:5px; border:1px solid #aaa; padding:2px 5px; font-size:12px; cursor:pointer; }
+.highlight { background: yellow; color: black; border-radius:3px; }
+
+/* 모달 */
+.modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); justify-content:center; align-items:center; }
+.modal img { max-width:90%; max-height:90%; border-radius:15px; touch-action: none; }
 </style>
 </head>
 <body>
@@ -33,24 +39,30 @@ button { border:none; background:#999; color:white; cursor:pointer; }
 
 <div class="grid" id="grid"></div>
 
+<!-- 모달 -->
+<div id="modal" class="modal">
+  <img id="modalImg" src="">
+</div>
+
+<script src="https://hammerjs.github.io/dist/hammer.min.js"></script>
 <script>
-// 새로고침에도 데이터 유지
+// 데이터
 let cards = JSON.parse(localStorage.getItem("pocaData")) || [];
 const grid = document.getElementById("grid");
 const counter = document.getElementById("counter");
+const modal = document.getElementById("modal");
+const modalImg = document.getElementById("modalImg");
+let currentIndex = 0;
+let scale = 1;
 
-// 저장 및 카운터
-function save(){
-  localStorage.setItem("pocaData", JSON.stringify(cards));
-  updateCounter();
-}
-function updateCounter(){
-  const owned = cards.filter(c=>c.owned).length;
-  const total = cards.length;
-  counter.innerText = `💖 ${owned} / ${total} (${Math.round((owned/total)*100)}%)`;
-}
+// 저장 + 카운터
+function save(){ localStorage.setItem("pocaData", JSON.stringify(cards)); updateCounter(); }
+function updateCounter(){ const owned = cards.filter(c=>c.owned).length; const total = cards.length; counter.innerText = `💖 ${owned} / ${total} (${Math.round((owned/total)*100)}%)`; }
 
-// 렌더링 + 통합 검색
+// 하이라이트
+function highlight(text, query){ if(!query) return text; const regex = new RegExp(`(${query})`, 'gi'); return text.replace(regex, '<span class="highlight">$1</span>'); }
+
+// 렌더
 function render(){
   const query = document.getElementById("searchInput").value.toLowerCase();
   grid.innerHTML="";
@@ -63,10 +75,10 @@ function render(){
 
       div.innerHTML=`
         <div class="delete" onclick="deleteCard(${index},event)">❌</div>
-        <img src="${card.img}" alt="포카">
-        <div><b>${card.member}</b></div>
-        <div>${card.album}</div>
-        <div>${card.grade}</div>
+        <img src="${card.img}" alt="포카" onclick="openModal(${index}, event)">
+        <div><b>${highlight(card.member, query)}</b></div>
+        <div>${highlight(card.album, query)}</div>
+        <div>${highlight(card.grade, query)}</div>
         <button class="editBtn" onclick="editCard(${index},event)">✏️ 수정</button>
       `;
 
@@ -77,34 +89,19 @@ function render(){
   save();
 }
 
-// 수정 버튼
-function editCard(index,e){
-  e.stopPropagation();
-  const card=cards[index];
-  const m=prompt("멤버 이름:", card.member);
-  const a=prompt("앨범 이름:", card.album);
-  const g=prompt("등급:", card.grade);
-  if(m) card.member=m;
-  if(a) card.album=a;
-  if(g) card.grade=g;
-  render();
-}
+// 수정
+function editCard(index,e){ e.stopPropagation(); const card=cards[index]; const m=prompt("멤버 이름:", card.member); const a=prompt("앨범 이름:", card.album); const g=prompt("등급:", card.grade); if(m) card.member=m; if(a) card.album=a; if(g) card.grade=g; render(); }
 
-// 사진 1장 추가
+// 추가
 function addFile(){
   const file=document.getElementById("fileInput").files[0];
   const member=document.getElementById("member").value;
   const album=document.getElementById("album").value;
   const grade=document.getElementById("grade").value;
   if(!file) return;
-
   const reader=new FileReader();
-  reader.onload=function(e){
-    cards.push({img:e.target.result, member, album, grade, owned:false});
-    render();
-  }
+  reader.onload=function(e){ cards.push({img:e.target.result, member, album, grade, owned:false}); render(); }
   reader.readAsDataURL(file);
-
   document.getElementById("fileInput").value="";
   document.getElementById("member").value="";
   document.getElementById("album").value="";
@@ -113,6 +110,32 @@ function addFile(){
 
 // 삭제
 function deleteCard(index,e){ e.stopPropagation(); cards.splice(index,1); render(); }
+
+// 모달 열기
+function openModal(index, e){
+  e.stopPropagation();
+  currentIndex = index;
+  modal.style.display = "flex";
+  modalImg.src = cards[index].img;
+  scale = 1;
+  modalImg.style.transform = `scale(${scale})`;
+
+  const hammer = new Hammer(modalImg);
+  hammer.get('pinch').set({ enable: true });
+  hammer.get('swipe').set({ direction: Hammer.DIRECTION_HORIZONTAL });
+  hammer.on('pinch', function(ev){ scale = ev.scale; modalImg.style.transform = `scale(${scale})`; });
+  hammer.on('swipe', function(ev){
+    if(ev.direction === Hammer.DIRECTION_LEFT) nextCard();
+    if(ev.direction === Hammer.DIRECTION_RIGHT) prevCard();
+  });
+}
+
+// 카드 이동
+function nextCard(){ if(currentIndex < cards.length-1){ currentIndex++; modalImg.src = cards[currentIndex].img; scale=1; modalImg.style.transform="scale(1)"; } }
+function prevCard(){ if(currentIndex > 0){ currentIndex--; modalImg.src = cards[currentIndex].img; scale=1; modalImg.style.transform="scale(1)"; } }
+
+// 모달 닫기
+modal.addEventListener('click',()=>{ modal.style.display="none"; });
 
 render();
 </script>
