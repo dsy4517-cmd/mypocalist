@@ -2,11 +2,10 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>My IVE Poca 💖</title>
+<title>포카 리스트</title>
 <style>
 body { font-family: Arial; background:#f5f5f5; text-align:center; margin:0; }
-h1 { color:#333; padding:15px; }
-.counter { font-weight:bold; color:#333; margin-bottom:10px; }
+.counter { font-weight:bold; color:#333; margin-bottom:10px; padding:15px 0; }
 .input-box { padding:10px; }
 input, button { padding:6px; margin:3px; border-radius:10px; border:1px solid #ccc; }
 button { border:none; background:#999; color:white; cursor:pointer; }
@@ -20,7 +19,6 @@ button { border:none; background:#999; color:white; cursor:pointer; }
 </head>
 <body>
 
-<h1>👑 My IVE Poca 👑</h1>
 <div class="counter" id="counter">0장 (0%)</div>
 
 <div class="input-box">
@@ -36,7 +34,7 @@ button { border:none; background:#999; color:white; cursor:pointer; }
 <div class="grid" id="grid"></div>
 
 <script>
-// ✅ 새로고침에도 데이터 유지
+// 새로고침에도 데이터 유지
 let cards = JSON.parse(localStorage.getItem("pocaData")) || [];
 const grid = document.getElementById("grid");
 const counter = document.getElementById("counter");
